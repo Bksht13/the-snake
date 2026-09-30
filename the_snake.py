@@ -65,13 +65,15 @@ class Apple(GameObject):
 
     def randomize_position(self, snake_positions):
         """Метод определяет случайную позицию яблока"""
-        while True:
+        self.position = (
+            GRID_SIZE * randint(0, GRID_WIDTH - 1),
+            GRID_SIZE * randint(0, GRID_HEIGHT - 1)
+        )
+        while self.position in snake_positions:
             self.position = (
                 GRID_SIZE * randint(0, GRID_WIDTH - 1),
                 GRID_SIZE * randint(0, GRID_HEIGHT - 1)
             )
-            if self.position not in snake_positions:
-                return
 
     def draw(self):
         """Метод отрисовывает яблоко"""
@@ -94,11 +96,8 @@ class Snake(GameObject):
 
     def __init__(self):
         super().__init__(body_color=SNAKE_COLOR)
-        self.length = 1
-        self.positions = [self.position]
+        self.reset()
         self.direction = RIGHT
-        self.next_direction = None
-        self.last = None
 
     def get_head_position(self):
         """Метод возвращает начальное положение головы змейки"""
@@ -114,20 +113,22 @@ class Snake(GameObject):
         """Метод описывает движение змейки"""
         self.update_direction()
         head_x, head_y = self.get_head_position()
-        x, y = self.direction
+        delta_x, delta_y = self.direction
         new_head = (
-            (head_x + x * GRID_SIZE) % SCREEN_WIDTH,
-            (head_y + y * GRID_SIZE) % SCREEN_HEIGHT
+            (head_x + delta_x * GRID_SIZE) % SCREEN_WIDTH,
+            (head_y + delta_y * GRID_SIZE) % SCREEN_HEIGHT
         )
         self.positions.insert(0, new_head)
         if len(self.positions) > self.length:
-            self.last = self.positions[-1]
-            self.positions.pop()
+            self.last = self.positions.pop()
 
     def reset(self):
         """Метод описывает последствия столкновения змейки"""
-        self.__init__()
+        self.length = 1
+        self.positions = [self.position]
         self.direction = choice([UP, DOWN, LEFT, RIGHT])
+        self.next_direction = None
+        self.last = None
 
     def draw(self):
         """Метод отрисовывает объект змейка"""
